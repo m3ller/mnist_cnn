@@ -8,7 +8,8 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 W, H = 28, 28
 WH = W*H
-NUM_LABELS = 10
+N_LABELS = 10
+N_HIDDEN = 10
 
 #TODO: when a batch of data is given, stack the digit images side by side
 def view(data, label, save_image=False):
@@ -36,14 +37,17 @@ def get_cnn():
     """ Build a convolutional neural network for MNIST digits
     """
     x = tf.placeholder(tf.float32, [None, WH], "data_x")
-    y = tf.placeholder(tf.float32, [None, NUM_LABELS], "label_y")
+    y = tf.placeholder(tf.float32, [None, N_LABELS], "label_y")
 
-    w1 = tf.get_variable("w1", shape=[WH, NUM_LABELS])
-    b1 = tf.get_variable("b1", shape=[NUM_LABELS])
+    x_reshape = tf.reshape(x, [-1, W, H, 1])
 
-    linear = tf.matmul(x, w1) + b1
+    # TODO: initialize with Kaiming?
+    f1 = tf.get_variable("f1", shape=[5, 5, 1, N_HIDDEN])
 
-    return x, y, linear
+    layer1 = tf.nn.conv2d(x_reshape, f1, [1,1,1,1], "SAME")
+
+
+    return x, y, layer1
 
 def main():
     # Build neural network
@@ -51,13 +55,13 @@ def main():
 
     # Run data in neural network
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-    data, label = mnist.train.next_batch(1)
+    data, label = mnist.train.next_batch(3)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         linear = sess.run(gc_linear, feed_dict={gc_data: data, gc_label: label})
 
     print linear
-    view(data, label, True)
+    #view(data, label, True)
 
 main()
 
