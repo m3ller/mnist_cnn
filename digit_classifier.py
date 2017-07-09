@@ -26,16 +26,13 @@ def view_mnist(data):
     img = np.ceil(data).astype('uint8') * 255
     img = img.reshape(batch_size*W, H)
     img = Image.fromarray(img, 'L')
-        
     img.show()
-    return
 
 def view_4D(data):
     batch_size, rows, cols, n_hidden = data.shape
 
     img = data.reshape((batch_size*rows, cols*n_hidden))
     img = Image.fromarray(img, 'L')
-
     img.show()
 
 def get_cnn():
@@ -48,11 +45,21 @@ def get_cnn():
 
     # TODO: initialize with Kaiming?
     f1 = tf.get_variable("f1", shape=[5, 5, 1, N_HIDDEN])
+    f2 = tf.get_variable("f2", shape=[5, 5, N_HIDDEN, N_HIDDEN])
 
-    layer1 = tf.nn.conv2d(x_reshape, f1, [1,1,1,1], "SAME")
+    conv1 = tf.nn.conv2d(x_reshape, f1, [1,1,1,1], "SAME")
+    pool1 = tf.layers.max_pooling2d(conv1, 2, 2)
 
+    conv2 = tf.nn.conv2d(pool1, f2, [1,1,1,1], "SAME")
+    pool2 = tf.layers.max_pooling2d(conv2, 2, 2)
+    pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * N_HIDDEN])
 
-    return x, y, layer1
+    full1 = tf.layers.dense(inputs=pool2_flat, units=256)
+    full2 = tf.layers.dense(inputs=full1, units=10)
+
+    tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=tf.log(full2))
+
+    return x, y, full2
 
 def main():
     # Build neural network
@@ -66,7 +73,7 @@ def main():
         linear = sess.run(gc_linear, feed_dict={gc_data: data, gc_label: label})
 
     view_mnist(data)
-    view_4D(linear)
+    #view_4D(linear)
 
 main()
 
