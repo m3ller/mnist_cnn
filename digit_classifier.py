@@ -12,26 +12,31 @@ N_LABELS = 10
 N_HIDDEN = 10
 
 #TODO: when a batch of data is given, stack the digit images side by side
-def view(data, label, save_image=False):
+def view_mnist(data):
     """ View data as a 28-by-28 pixel image, with an option to save the image
     as 'mnist_<label value>'.png.
 
     Reshape numpy array 'data' to a 28-by-28 array and view image.
     Args:
-        data: 1-by-784 Numpy array. Element values [0,1]
-        label: 1-by-10 Numpy array. One-hot.
+        data: batch_size-by-784 Numpy array. Element values [0,1]
         save_image: Boolean. Whether to save a png of data.
     """
-    img = np.ceil(data).astype('uint8') * 255
-    img = img.reshape(W, H)
-    img = Image.fromarray(img, 'L')
+    batch_size = data.shape[0]
 
-    img_label = np.where(label)[1][0]
-    if save_image:
-        img.save('./mnist_{0}.png'.format(img_label))
+    img = np.ceil(data).astype('uint8') * 255
+    img = img.reshape(batch_size*W, H)
+    img = Image.fromarray(img, 'L')
         
     img.show()
     return
+
+def view_4D(data):
+    batch_size, rows, cols, n_hidden = data.shape
+
+    img = data.reshape((batch_size*rows, cols*n_hidden))
+    img = Image.fromarray(img, 'L')
+
+    img.show()
 
 def get_cnn():
     """ Build a convolutional neural network for MNIST digits
@@ -60,8 +65,8 @@ def main():
         sess.run(tf.global_variables_initializer())
         linear = sess.run(gc_linear, feed_dict={gc_data: data, gc_label: label})
 
-    print linear
-    #view(data, label, True)
+    view_mnist(data)
+    view_4D(linear)
 
 main()
 
