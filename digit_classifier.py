@@ -56,23 +56,30 @@ def get_cnn():
 
     full1 = tf.layers.dense(inputs=pool2_flat, units=256)
     full2 = tf.layers.dense(inputs=full1, units=10)
+    full2 = full2 + 1
 
-    tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=tf.log(full2))
+    xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full2)
+    loss = tf.reduce_sum(xentropy)
+    optimizer = tf.train.AdamOptimizer().minimize(loss)
 
-    return x, y, full2
+    return x, y, optimizer, loss
 
 def main():
     # Build neural network
-    gc_data, gc_label, gc_linear = get_cnn()
+    gc_data, gc_label, gc_optim, gc_loss = get_cnn()
 
     # Run data in neural network
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-    data, label = mnist.train.next_batch(3)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        linear = sess.run(gc_linear, feed_dict={gc_data: data, gc_label: label})
 
-    view_mnist(data)
+        # Training
+        for _ in xrange(1000):
+            data, label = mnist.train.next_batch(10)
+            _, loss = sess.run([gc_optim, gc_loss], feed_dict={gc_data: data, gc_label: label})
+            print loss
+
+    #view_mnist(data)
     #view_4D(linear)
 
 main()
