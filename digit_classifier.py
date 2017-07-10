@@ -10,8 +10,10 @@ W, H = 28, 28
 WH = W*H
 N_LABELS = 10
 N_HIDDEN = 10
-BATCH_SIZE = 16
-N_BATCHES = 1000
+TRAIN_BATCH_SIZE = 16
+TEST_BATCH_SIZE = 16
+N_TRAIN_BATCHES = 2500
+N_TEST_BATCHES = 625
 
 #TODO: when a batch of data is given, stack the digit images side by side
 def view_mnist(data):
@@ -62,6 +64,10 @@ def get_cnn():
     pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * N_HIDDEN])
     full = tf.matmul(pool2_flat, w) + b
 
+    global_step = tf.Variable(0, trainable=False)
+    initial_learn_rate = 0.1
+    learn_rate = tf.train.exponential_decay(initial_learn_rate, global_step, 100000, 0.96, True)
+
     xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full)
     loss = tf.reduce_sum(xentropy)
     optimizer = tf.train.AdamOptimizer().minimize(loss)
@@ -80,15 +86,23 @@ def main():
 
         # Training
         data = None
-        for _ in xrange(N_BATCHES):
-            data, label = mnist.train.next_batch(BATCH_SIZE)
+        for _ in xrange(N_TRAIN_BATCHES):
+            data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
             convs, pools, pred, loss, _ = sess.run([gc_convs, gc_pools, gc_pred, gc_loss, gc_optim], feed_dict={gc_data: data, gc_label: label})
-            print loss
+            #print loss
 
         # Testing
-        test_data, test_label = mnist.test.next_batch(16)
-        test_pred = sess.run(gc_pred, feed_dict={gc_data: test_data, gc_label: test_label})
+        n_correct = 0
+        for _ in xrange(N_TEST_BATCHES):
+            test_data, test_label = mnist.test.next_batch(TEST_BATCH_SIZE)
+            test_pred = sess.run(gc_pred, feed_dict={gc_data: test_data, gc_label: test_label})
+
+            prediction = np.argmax(test_pred, axis=1)
+            answer = np.argmax(test_label, axis=1)
+            n_correct += np.sum(np.equal(prediction, answer))
         
+        print "Number of correct answers: ", n_correct
+        print "Accuracy of answers:       ", n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE)
         
     """
     view_mnist(data)
@@ -98,8 +112,6 @@ def main():
     view_4D(pools[1])
     print np.argmax(pred, axis=1)
     """
-    view_mnist(test_data)
-    print np.argmax(test_pred, axis=1)
 main()
 
     
