@@ -64,11 +64,11 @@ def get_cnn():
     loss = tf.reduce_sum(xentropy)
     optimizer = tf.train.AdamOptimizer().minimize(loss)
 
-    return x, y, [conv1, conv2], [pool1, pool2], loss, optimizer
+    return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer
 
 def main():
     # Build neural network
-    gc_data, gc_label, gc_convs, gc_pools, gc_loss, gc_optim = get_cnn()
+    gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim = get_cnn()
 
     # Run data in neural network
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
@@ -77,9 +77,9 @@ def main():
 
         # Training
         data = None
-        for _ in xrange(100):
-            data, label = mnist.train.next_batch(10)
-            convs, pools, loss, _ = sess.run([gc_convs, gc_pools, gc_loss, gc_optim], feed_dict={gc_data: data, gc_label: label})
+        for _ in xrange(1000):
+            data, label = mnist.train.next_batch(16)
+            convs, pools, pred, loss, _ = sess.run([gc_convs, gc_pools, gc_pred, gc_loss, gc_optim], feed_dict={gc_data: data, gc_label: label})
             print loss
 
     view_mnist(data)
@@ -87,6 +87,7 @@ def main():
     view_4D(pools[0])
     view_4D(convs[1])
     view_4D(pools[1])
+    print np.argmax(pred, axis=1)
 
 main()
 
