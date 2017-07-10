@@ -9,7 +9,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 W, H = 28, 28
 WH = W*H
 N_LABELS = 10
-N_HIDDEN = 5
+N_HIDDEN = 2
 
 #TODO: when a batch of data is given, stack the digit images side by side
 def view_mnist(data):
@@ -30,9 +30,8 @@ def view_mnist(data):
 
 def view_4D(data):
     batch_size, rows, cols, n_hidden = data.shape
-    print data.dtype
-
-    img = data.reshape((batch_size*rows, cols*n_hidden), order='C')
+    data = np.swapaxes(data, 2, 3)
+    img = data.reshape((batch_size*rows, cols * n_hidden), order='C')
     img = Image.fromarray(img, 'I')
     img.show()
 
@@ -41,17 +40,19 @@ def get_cnn():
     """
     x = tf.placeholder(tf.float32, [None, WH], "data_x")
     y = tf.placeholder(tf.float32, [None, N_LABELS], "label_y")
-    bias1 = tf.get_variable("bias1", shape=[N_HIDDEN])
+    #bias1 = tf.get_variable("bias1", shape=[N_HIDDEN])
 
     x_reshape = tf.reshape(x, [-1, H, W, 1])
 
     # TODO: initialize with Kaiming?
-    f1 = tf.get_variable("f1", shape=[5, 5, 1, N_HIDDEN])
+    f1 = tf.ones(shape=[5, 5, 1, N_HIDDEN])
+    """
     f2 = tf.get_variable("f2", shape=[5, 5, N_HIDDEN, N_HIDDEN])
     w1 = tf.get_variable("w1", shape=[7 * 7 * N_HIDDEN, N_LABELS])
     b1 = tf.get_variable("b1", shape=[1, N_LABELS])
-
+    """
     conv1 = tf.nn.conv2d(x_reshape, f1, [1,1,1,1], "SAME")
+    """
     conv1 = conv1 + bias1
     pool1 = tf.layers.max_pooling2d(conv1, 2, 2)
     pool1 = tf.nn.relu(pool1)
@@ -63,15 +64,17 @@ def get_cnn():
 
     full1 = tf.matmul(pool2_flat, w1) + b1
 
-    xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full1)
+    xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=1)
     loss = tf.reduce_sum(xentropy)
     optimizer = tf.train.AdamOptimizer().minimize(loss)
+    """
 
-    return x, y, optimizer, conv1, loss
+    #return x, y, optimizer, conv1, loss
+    return x, y, conv1
 
 def main():
     # Build neural network
-    gc_data, gc_label, gc_optim, gc_conv2, gc_loss = get_cnn()
+    gc_data, gc_label, gc_conv = get_cnn()
 
     # Run data in neural network
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
@@ -80,10 +83,9 @@ def main():
 
         # Training
         data = None
-        for _ in xrange(1000):
+        for _ in xrange(10):
             data, label = mnist.train.next_batch(10)
-            _, loss, conv2 = sess.run([gc_optim, gc_loss, gc_conv2], feed_dict={gc_data: data, gc_label: label})
-            print loss
+            conv2 = sess.run(gc_conv, feed_dict={gc_data: data, gc_label: label})
 
     view_mnist(data)
     view_4D(conv2)
