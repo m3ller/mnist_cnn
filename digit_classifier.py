@@ -10,6 +10,8 @@ W, H = 28, 28
 WH = W*H
 N_LABELS = 10
 N_HIDDEN = 10
+BATCH_SIZE = 16
+N_BATCHES = 1000
 
 #TODO: when a batch of data is given, stack the digit images side by side
 def view_mnist(data):
@@ -64,6 +66,7 @@ def get_cnn():
     loss = tf.reduce_sum(xentropy)
     optimizer = tf.train.AdamOptimizer().minimize(loss)
 
+    #TODO: store loss onto TensorBoard
     return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer
 
 def main():
@@ -77,18 +80,26 @@ def main():
 
         # Training
         data = None
-        for _ in xrange(1000):
-            data, label = mnist.train.next_batch(16)
+        for _ in xrange(N_BATCHES):
+            data, label = mnist.train.next_batch(BATCH_SIZE)
             convs, pools, pred, loss, _ = sess.run([gc_convs, gc_pools, gc_pred, gc_loss, gc_optim], feed_dict={gc_data: data, gc_label: label})
             print loss
 
+        # Testing
+        test_data, test_label = mnist.test.next_batch(16)
+        test_pred = sess.run(gc_pred, feed_dict={gc_data: test_data, gc_label: test_label})
+        
+        
+    """
     view_mnist(data)
     view_4D(convs[0])
     view_4D(pools[0])
     view_4D(convs[1])
     view_4D(pools[1])
     print np.argmax(pred, axis=1)
-
+    """
+    view_mnist(test_data)
+    print np.argmax(test_pred, axis=1)
 main()
 
     
