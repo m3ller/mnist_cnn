@@ -65,13 +65,15 @@ def get_cnn():
     full = tf.matmul(pool2_flat, w) + b
 
     global_step = tf.Variable(0, trainable=False)
-    initial_learn_rate = 0.01
+    initial_learn_rate = 0.001
     learn_rate = tf.train.exponential_decay(initial_learn_rate, global_step,\
-                     10000, 0.96, True)
+                     1000, 0.95, False)
 
     xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full)
     loss = tf.reduce_sum(xentropy)
-    optimizer = tf.train.AdamOptimizer().minimize(loss)
+    optimizer = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
+    #optimizer = tf.train.GradientDescentOptimizer(learn_rate).minimize(loss, global_step=global_step)
+    #optimizer = tf.train.AdagradOptimizer(learn_rate).minimize(loss, global_step=global_step)
 
     # Store on TensorBoard
     tf.summary.scalar("learning_rate", learn_rate)
@@ -98,7 +100,10 @@ def main():
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
             loss, _, summary = sess.run([gc_loss, gc_optim, gc_summary_op],\
                           feed_dict={gc_data: data, gc_label: label})
-            writer.add_summary(summary, ii)
+
+            if ii % 100. == 0:
+                writer.add_summary(summary, ii)
+                print "Train batch {0} loss: {1}".format(ii, loss)
 
         # Testing
         n_correct = 0
@@ -111,18 +116,20 @@ def main():
             prediction = np.argmax(test_pred, axis=1)
             answer = np.argmax(test_label, axis=1)
             n_correct += np.sum(np.equal(prediction, answer))
-        
-        print "Number of correct answers: ", n_correct
-        print "Accuracy of answers:       ", \
+     
+        print "Number of correct answers in Test: ", n_correct
+        print "Accuracy of answers in Test:       ", \
             n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
     
     # View some of the test data
+    """
     view_mnist(test_data)
     view_4D(convs[0])
     view_4D(pools[0])
     view_4D(convs[1])
     view_4D(pools[1])
-    print np.argmax(test_pred, axis=1)
+    """
+    print "Test prediction: ", np.argmax(test_pred, axis=1)
 
 if __name__ == "__main__":
     main()
