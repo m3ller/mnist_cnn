@@ -66,7 +66,8 @@ def get_cnn():
 
     global_step = tf.Variable(0, trainable=False)
     initial_learn_rate = 0.01
-    learn_rate = tf.train.exponential_decay(initial_learn_rate, global_step, 10000, 0.96, True)
+    learn_rate = tf.train.exponential_decay(initial_learn_rate, global_step,\
+                     10000, 0.96, True)
 
     xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full)
     loss = tf.reduce_sum(xentropy)
@@ -88,31 +89,31 @@ def main():
         data = None
         for _ in xrange(N_TRAIN_BATCHES):
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
-            convs, pools, pred, loss, _ = sess.run([gc_convs, gc_pools, gc_pred, gc_loss, gc_optim], feed_dict={gc_data: data, gc_label: label})
-            #print loss
+            loss, _ = sess.run([gc_loss, gc_optim],\
+                               feed_dict={gc_data: data, gc_label: label})
 
         # Testing
         n_correct = 0
         for _ in xrange(N_TEST_BATCHES):
             test_data, test_label = mnist.test.next_batch(TEST_BATCH_SIZE)
-            test_pred = sess.run(gc_pred, feed_dict={gc_data: test_data, gc_label: test_label})
+            convs, pools, test_pred = sess.run([gc_convs, gc_pools, gc_pred],\
+                                               feed_dict={gc_data: test_data,
+                                                          gc_label: test_label})
 
             prediction = np.argmax(test_pred, axis=1)
             answer = np.argmax(test_label, axis=1)
             n_correct += np.sum(np.equal(prediction, answer))
         
         print "Number of correct answers: ", n_correct
-        print "Accuracy of answers:       ", n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE)
+        print "Accuracy of answers:       ", \
+            n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
         
-    """
-    view_mnist(data)
+    view_mnist(test_data)
     view_4D(convs[0])
     view_4D(pools[0])
     view_4D(convs[1])
     view_4D(pools[1])
-    print np.argmax(pred, axis=1)
-    """
-main()
+    print np.argmax(test_pred, axis=1)
 
-    
-
+if __name__ == "__main__":
+    main()
