@@ -73,32 +73,40 @@ def get_cnn():
     loss = tf.reduce_sum(xentropy)
     optimizer = tf.train.AdamOptimizer().minimize(loss)
 
+    # Store on TensorBoard
+    tf.summary.scalar("learning_rate", learn_rate)
+    tf.summary.scalar("loss", loss)
+    summary_op = tf.summary.merge_all()
+
     #TODO: store loss onto TensorBoard
-    return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer
+    return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer,\
+        summary_op
 
 def main():
     # Build neural network
-    gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim = get_cnn()
+    (gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim,
+        gc_summary_op) = get_cnn()
 
     # Run data in neural network
-    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+    mnist  = input_data.read_data_sets("MNIST_data/", one_hot=True)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
         # Training
-        data = None
-        for _ in xrange(N_TRAIN_BATCHES):
+        writer = tf.summary.FileWriter("./tf_logs/", sess.graph)
+        for ii in xrange(N_TRAIN_BATCHES):
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
-            loss, _ = sess.run([gc_loss, gc_optim],\
-                               feed_dict={gc_data: data, gc_label: label})
+            loss, _, summary = sess.run([gc_loss, gc_optim, gc_summary_op],\
+                          feed_dict={gc_data: data, gc_label: label})
+            writer.add_summary(summary, ii)
 
         # Testing
         n_correct = 0
         for _ in xrange(N_TEST_BATCHES):
             test_data, test_label = mnist.test.next_batch(TEST_BATCH_SIZE)
             convs, pools, test_pred = sess.run([gc_convs, gc_pools, gc_pred],\
-                                               feed_dict={gc_data: test_data,
-                                                          gc_label: test_label})
+                                          feed_dict={gc_data: test_data,
+                                                     gc_label: test_label})
 
             prediction = np.argmax(test_pred, axis=1)
             answer = np.argmax(test_label, axis=1)
@@ -107,7 +115,8 @@ def main():
         print "Number of correct answers: ", n_correct
         print "Accuracy of answers:       ", \
             n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
-        
+    
+    # View some of the test data
     view_mnist(test_data)
     view_4D(convs[0])
     view_4D(pools[0])
