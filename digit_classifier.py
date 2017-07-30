@@ -64,26 +64,18 @@ def get_cnn():
     pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * N_HIDDEN])
     full = tf.matmul(pool2_flat, w) + b
 
-    global_step = tf.Variable(0, trainable=False)
-    initial_learn_rate = 0.001
-    learn_rate = tf.train.exponential_decay(initial_learn_rate, global_step,\
-                     1000, 0.95, False)
-
     xentropy = tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=full)
     loss = tf.reduce_sum(xentropy)
-    optimizer = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
-    #optimizer = tf.train.GradientDescentOptimizer(learn_rate).minimize(loss, global_step=global_step)
-    #optimizer = tf.train.AdagradOptimizer(learn_rate).minimize(loss, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer().minimize(loss)
 
     # Store on TensorBoard
-    tf.summary.scalar("learning_rate", learn_rate)
     tf.summary.scalar("loss", loss)
     summary_op = tf.summary.merge_all()
 
-    #TODO: store loss onto TensorBoard
     return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer,\
         summary_op
 
+#TODO: store checkpoints
 def main():
     # Build neural network
     (gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim,
@@ -95,14 +87,14 @@ def main():
         sess.run(tf.global_variables_initializer())
 
         # Training
-        writer = tf.summary.FileWriter("./tf_logs/", sess.graph)
+        train_writer = tf.summary.FileWriter("./tf_logs/", sess.graph)
         for ii in xrange(N_TRAIN_BATCHES):
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
             loss, _, summary = sess.run([gc_loss, gc_optim, gc_summary_op],\
                           feed_dict={gc_data: data, gc_label: label})
 
             if ii % 100. == 0:
-                writer.add_summary(summary, ii)
+                train_writer.add_summary(summary, ii)
                 print "Train batch {0} loss: {1}".format(ii, loss)
 
         # Testing
@@ -121,15 +113,15 @@ def main():
         print "Accuracy of answers in Test:       ", \
             n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
     
-    # View some of the test data
     """
+    # View some of the test data
     view_mnist(test_data)
     view_4D(convs[0])
     view_4D(pools[0])
     view_4D(convs[1])
     view_4D(pools[1])
-    """
     print "Test prediction: ", np.argmax(test_pred, axis=1)
+    """
 
 if __name__ == "__main__":
     main()
