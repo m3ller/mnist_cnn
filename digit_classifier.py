@@ -33,6 +33,17 @@ def view_mnist(data):
     img.show()
 
 def view_4D(data):
+    """ Unroll 4D data and show it as a 2D image.
+
+    Specifically, 'data' has dimensions of batch size, image row, image column, 
+    and hidden nodes in a layer (read: filters in a layer).  view_4D(..) will
+    display 'data' by unrolling it into a 2D table of images.
+    
+    Each element of the "table" is an image of the result of passing an input
+    'image' into a hidden node. Each i-th row of images is the result of
+    passing sample i into different hidden nodes.  Each j-th column of images
+    is the result of passing various samples through hidden node j.
+    """
     batch_size, rows, cols, n_hidden = data.shape
     data = np.swapaxes(data, 2, 3)
     img = data.reshape((batch_size*rows, cols * n_hidden), order='C')
