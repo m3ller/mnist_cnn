@@ -19,3 +19,7 @@ After going through one layer of convolution and then max pooling:
 After going through a second layer of convolution and max pooling:
 ![conv2](https://github.com/m3ller/mnist_cnn/blob/master/conv2.png)
 ![pool2](https://github.com/m3ller/mnist_cnn/blob/master/pool2.png)
+
+Network makes a prediction on what the handwritten MNIST batch data says. 
+This gets displayed on terminal.
+![prediction](https://github.com/m3ller/mnist_cnn/blob/master/prediction.png)
