@@ -6,5 +6,6 @@ network, and uses TensorBoard to track the loss.
 
 ## Network Overview
 <!--Show pictures of results-->
+![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png)
 Goes through two layers of convlution/max pooling.  Does a linear transformation.
 Use cross entropy and minimize the loss with an Adam optimizer.
