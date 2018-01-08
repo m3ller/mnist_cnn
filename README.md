@@ -24,5 +24,4 @@ max pooling:
 
 Network makes a prediction on what the handwritten MNIST batch data says. 
 This gets displayed on terminal.
-![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png)
-![prediction](https://github.com/m3ller/mnist_cnn/blob/master/prediction.png)
+![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png) ![prediction](https://github.com/m3ller/mnist_cnn/blob/master/prediction.png)
