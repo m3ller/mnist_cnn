@@ -11,8 +11,10 @@ of convolution/max pooling.  Does a linear transformation.
 Use cross entropy and minimize the loss with an Adam optimizer.
 
 ## Looking inside the Network
-A batch of 16 samples of MNIST data:
-![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png) <!-- .element height="50%" width="50%" -->
+The default batch size for this network is 16, but for the sake of displaying the array of images with a reasonable amount of space, let's demonstrate the network with a smaller batch size of 4 samples.
+
+A batch of 4 samples of MNIST data:
+![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png)
 
 After going through one layer of convolution (with 32 hidden nodes) and
 then max pooling:
