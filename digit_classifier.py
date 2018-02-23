@@ -1,6 +1,7 @@
 """
 A simple convolutional neural network to classify MNIST digits.
 """
+import argparse
 import numpy as np
 from PIL import Image
 import tensorflow as tf
@@ -15,7 +16,16 @@ TEST_BATCH_SIZE = 16
 N_TRAIN_BATCHES = 3437
 N_TEST_BATCHES = 625
 
-#TODO: when a batch of data is given, stack the digit images side by side
+def get_args():
+    """ Set flags available for this program.  Return available arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--verbose",\
+            help="Print loss onto terminal; display a subset of test images",\
+            action="store_true")
+    args = parser.parse_args()
+    return args
+
 def view_mnist(data):
     """ View data as a 28-by-28 pixel image, with an option to save the image
     as 'mnist_<label value>'.png.
@@ -88,6 +98,9 @@ def get_cnn():
 
 #TODO: store checkpoints
 def main():
+    # Parse arguments
+    args = get_args()
+
     # Build neural network
     (gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim,
         gc_summary_op) = get_cnn()
@@ -98,17 +111,19 @@ def main():
         sess.run(tf.global_variables_initializer())
 
         # Training
+        print "Training CNN.."
         train_writer = tf.summary.FileWriter("./tf_logs/", sess.graph)
         for ii in xrange(N_TRAIN_BATCHES):
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
             loss, _, summary = sess.run([gc_loss, gc_optim, gc_summary_op],\
                           feed_dict={gc_data: data, gc_label: label})
 
-            if ii % 100. == 0:
+            if args.verbose and ii % 100. == 0:
                 train_writer.add_summary(summary, ii)
                 print "Train batch {0} loss: {1}".format(ii, loss)
 
         # Testing
+        print "Testing CNN.."
         n_correct = 0
         for _ in xrange(N_TEST_BATCHES):
             test_data, test_label = mnist.test.next_batch(TEST_BATCH_SIZE)
@@ -124,15 +139,15 @@ def main():
         print "Accuracy of answers in Test:       ", \
             n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
     
-    """
-    # View some of the test data
-    view_mnist(test_data)
-    view_4D(convs[0])
-    view_4D(pools[0])
-    view_4D(convs[1])
-    view_4D(pools[1])
-    print "Test prediction: ", np.argmax(test_pred, axis=1)
-    """
+
+    if args.verbose:
+        # View some of the test data
+        view_mnist(test_data)
+        view_4D(convs[0])
+        view_4D(pools[0])
+        view_4D(convs[1])
+        view_4D(pools[1])
+        print "Subset of Test's prediction: ", np.argmax(test_pred, axis=1)
 
 if __name__ == "__main__":
     main()
