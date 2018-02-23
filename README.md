@@ -11,22 +11,24 @@ of convolution/max pooling.  Does a linear transformation.
 Use cross entropy and minimize the loss with an Adam optimizer.
 
 ## Looking inside the Network
-The default batch size for this network is 16, but for the sake of displaying the array of images with a reasonable amount of space, let's demonstrate the network with a smaller batch size of 4 samples.
+The default batch size for this network is 16, but for the sake of displaying
+the array of images with a reasonable amount of space, let's demonstrate the
+network with a smaller batch size of 4 samples.
 
-A batch of 4 samples of MNIST data:
+A batch of 4 samples of MNIST data:   
 ![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png)
 
 After going through one layer of convolution (with 32 hidden nodes) and
-then max pooling:
-![conv1](https://github.com/m3ller/mnist_cnn/blob/master/conv1.png)
+then max pooling.  Note that the effects of each node is shown along the 32
+columns of the image array below.
+![conv1](https://github.com/m3ller/mnist_cnn/blob/master/conv1.png)   
 ![pool1](https://github.com/m3ller/mnist_cnn/blob/master/pool1.png)
 
 After going through a second layer of convolution (with 32 hidden nodes) and
 max pooling:
-![conv2](https://github.com/m3ller/mnist_cnn/blob/master/conv2.png)
+![conv2](https://github.com/m3ller/mnist_cnn/blob/master/conv2.png)   
 ![pool2](https://github.com/m3ller/mnist_cnn/blob/master/pool2.png)
 
 Network makes a prediction on what the handwritten MNIST batch data says. 
 This gets displayed on terminal.
-![MNIST_digits](https://github.com/m3ller/mnist_cnn/blob/master/handwriting.png)
 ![prediction](https://github.com/m3ller/mnist_cnn/blob/master/prediction.png)
