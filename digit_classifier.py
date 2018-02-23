@@ -3,6 +3,7 @@ A simple convolutional neural network to classify MNIST digits.
 """
 import argparse
 import numpy as np
+import os
 from PIL import Image
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -26,9 +27,9 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def view_mnist(data):
+def view_mnist(data, save_img_name):
     """ View data as a 28-by-28 pixel image, with an option to save the image
-    as 'mnist_<label value>'.png.
+    as ./<save_img_name>.png.
 
     Reshape numpy array 'data' to a 28-by-28 array and view image.
     Args:
@@ -42,7 +43,11 @@ def view_mnist(data):
     img = Image.fromarray(img, 'L')
     img.show()
 
-def view_4D(data):
+    # Save image
+    img_name = os.path.join("./", save_img_name + ".png")
+    img.save(img_name)
+
+def view_4D(data, save_img_name):
     """ Unroll 4D data and show it as a 2D image.
 
     Specifically, 'data' has dimensions of batch size, image row, image column, 
@@ -59,6 +64,10 @@ def view_4D(data):
     img = data.reshape((batch_size*rows, cols * n_hidden), order='C')
     img = Image.fromarray(img, 'I')
     img.show()
+
+    # Save image
+    img_name = os.path.join("./", save_img_name + ".png")
+    img.save(img_name)
 
 def get_cnn():
     """ Build a convolutional neural network for MNIST digits
@@ -142,11 +151,11 @@ def main():
 
     if args.verbose:
         # View some of the test data
-        view_mnist(test_data)
-        view_4D(convs[0])
-        view_4D(pools[0])
-        view_4D(convs[1])
-        view_4D(pools[1])
+        view_mnist(test_data, "handwriting")
+        view_4D(convs[0], "conv1")
+        view_4D(pools[0], "pool1")
+        view_4D(convs[1], "conv2")
+        view_4D(pools[1], "pool2")
         print "Subset of Test's prediction: ", np.argmax(test_pred, axis=1)
 
 if __name__ == "__main__":
