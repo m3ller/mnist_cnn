@@ -14,8 +14,6 @@ N_LABELS = 10
 N_HIDDEN = 32
 TRAIN_BATCH_SIZE = 16 
 TEST_BATCH_SIZE = 16
-N_TRAIN_BATCHES = 3437
-N_TEST_BATCHES = 625
 
 def get_args():
     """ Set flags available for this program.  Return available arguments.
@@ -75,7 +73,6 @@ def get_cnn():
     x = tf.placeholder(tf.float32, [None, WH], "data_x")
     y = tf.placeholder(tf.float32, [None, N_LABELS], "label_y")
 
-    # TODO: initialize with Kaiming?
     f1 = tf.get_variable("f1", shape=[5, 5, 1, N_HIDDEN])
     f2 = tf.get_variable("f2", shape=[5, 5, N_HIDDEN, N_HIDDEN])
     w = tf.get_variable("w", shape=[7 * 7 * N_HIDDEN, N_LABELS])
@@ -105,7 +102,6 @@ def get_cnn():
     return x, y, [conv1, conv2], [pool1, pool2], full, loss, optimizer,\
         summary_op
 
-#TODO: store checkpoints
 def main():
     # Parse arguments
     args = get_args()
@@ -114,15 +110,19 @@ def main():
     (gc_data, gc_label, gc_convs, gc_pools, gc_pred, gc_loss, gc_optim,
         gc_summary_op) = get_cnn()
 
-    # Run data in neural network
+    # Read data
     mnist  = input_data.read_data_sets("MNIST_data/", one_hot=True)
+    n_train_batches = int(np.floor(mnist.train._num_examples / TRAIN_BATCH_SIZE))
+    n_test_batches = int(np.floor(mnist.test._num_examples / TEST_BATCH_SIZE))
+
+    # Run data in neural network
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
         # Training
         print "Training CNN.."
         train_writer = tf.summary.FileWriter("./tf_logs/", sess.graph)
-        for ii in xrange(N_TRAIN_BATCHES):
+        for ii in xrange(n_train_batches):
             data, label = mnist.train.next_batch(TRAIN_BATCH_SIZE)
             loss, _, summary = sess.run([gc_loss, gc_optim, gc_summary_op],\
                           feed_dict={gc_data: data, gc_label: label})
@@ -134,7 +134,7 @@ def main():
         # Testing
         print "Testing CNN.."
         n_correct = 0
-        for _ in xrange(N_TEST_BATCHES):
+        for _ in xrange(n_test_batches):
             test_data, test_label = mnist.test.next_batch(TEST_BATCH_SIZE)
             convs, pools, test_pred = sess.run([gc_convs, gc_pools, gc_pred],\
                                           feed_dict={gc_data: test_data,
@@ -146,7 +146,7 @@ def main():
      
         print "Number of correct answers in Test: ", n_correct
         print "Accuracy of answers in Test:       ", \
-            n_correct / float(N_TEST_BATCHES * TEST_BATCH_SIZE) * 100.0
+            n_correct / float(n_test_batches * TEST_BATCH_SIZE) * 100.0
     
 
     if args.verbose:
