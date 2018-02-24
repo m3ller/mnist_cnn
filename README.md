@@ -11,8 +11,8 @@ Train and test CNN
 python digit_classifier.py
 ```
 
-Train and test CNN. Peek into the CNN and look at images of a subset test data.
-See how the loss printed onto the terminal during training. 
+Train and test CNN. Peek into the CNN and look at images of a batch of the test
+data. See the loss printed onto the terminal during training. 
 ```
 python digit_classifier.py --verbose
 ```
