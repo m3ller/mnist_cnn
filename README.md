@@ -5,6 +5,24 @@ with greater than 98% accuracy. The code includes functions to view the
 convolutions and the pooling that occurs within the network, and uses
 TensorBoard to track the loss.
 
+## Usage
+Train and test CNN
+```
+python digit_classifier.py
+```
+
+Train and test CNN. Peek into the CNN and look at images of a subset test data.
+See how the loss printed onto the terminal during training. 
+```
+python digit_classifier.py --verbose
+```
+
+TensorBoard Events are saved into `./tf_logs`.  To run TensorBoard and see the
+training loss,
+```
+tensorboard --log_dir ./tf_logs
+```
+
 ## Network Overview
 The network takes in a batch of MNIST data.  The data goes through two layers
 of convolution/max pooling.  Does a linear transformation.
